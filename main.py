@@ -2,8 +2,13 @@ import sqlite3
 from fastapi import FastAPI, File, UploadFile, Form
 import pdfplumber
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi import Request
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory="templates")
 
 # Allow frontend to access backend
 app.add_middleware(
@@ -63,6 +68,10 @@ def generate_suggestions(missing_skills):
     for skill in missing_skills:
         suggestions.append(f"Consider learning {skill} through online courses, projects, or certifications.")
     return suggestions
+
+@app.get("/", response_class=HTMLResponse)
+async def get_index(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/analyze/")
 async def analyze_resume(resume: UploadFile = File(...), job_role: str = Form(...)):

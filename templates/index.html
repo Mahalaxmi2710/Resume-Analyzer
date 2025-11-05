@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: url('https://t3.ftcdn.net/jpg/02/76/26/88/360_F_276268861_Y4ZHLZuZoXVkrXsjaHkaJn7xbE57dz81.jpg') no-repeat center center/cover;
+            color: #fff;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+        }
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .results {
+            background: rgba(255, 255, 255, 0.9);
+            color: #000;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 10px;
+            display: none;
+            text-align: left;
+        }
+        .loading {
+            display: none;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>SkillGap Analyzer: Unlock Your Job Potential</h2>
+        <h2>Upload your resume for Job Matching</h2>
+        
+        <form id="resumeForm">
+            <label for="job_role">Select Job Role:</label>
+            <select id="job_role">
+                <option value="Software Developer">Software Developer</option>
+                <option value="Data Scientist">Data Scientist</option>
+                <option value="UI/UX Designer">UI/UX Designer</option>
+                <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+                <option value="DevOps Engineer">DevOps Engineer</option>
+                <option value="Project Manager">Project Manager</option>
+                <option value="Business Analyst">Business Analyst</option>
+                <option value="Cloud Engineer">Cloud Engineer</option>
+                <option value="Embedded Systems Engineer">Embedded Systems Engineer</option>
+                <option value="AI/ML Engineer">AI/ML Engineer</option>
+                <option value="Network Engineer">Network Engineer</option>
+                <option value="Database Administrator">Database Administrator</option>
+                <option value="Quality Assurance Engineer">Quality Assurance Engineer</option>
+                <option value="Full Stack Developer">Full Stack Developer</option>
+                <option value="Game Developer">Game Developer</option>
+            </select>
+            
+            <label for="resume">Upload Resume (PDF):</label>
+            <input type="file" id="resume" accept=".pdf" required>
+            
+            <button type="submit">Analyze Resume</button>
+            <p class="loading" id="loadingMessage">Analyzing resume... Please wait.</p>
+        </form>
+    </div>
+
+    <div id="results" class="results"></div>
+
+    <script>
+        document.getElementById("resumeForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            let formData = new FormData();
+            let fileInput = document.getElementById("resume");
+            let jobRole = document.getElementById("job_role").value;
+            let resultsDiv = document.getElementById("results");
+            let loadingMessage = document.getElementById("loadingMessage");
+
+            if (fileInput.files.length === 0) {
+                alert("Please upload a resume.");
+                return;
+            }
+
+            formData.append("resume", fileInput.files[0]);
+            formData.append("job_role", jobRole);
+
+            // Show loading message
+            loadingMessage.style.display = "block";
+            resultsDiv.style.display = "none";
+
+            try {
+                let response = await fetch("http://127.0.0.1:8000/analyze/", {
+                    method: "POST",
+                    body: formData
+                });
+
+                let result = await response.json();
+
+                loadingMessage.style.display = "none";
+                resultsDiv.style.display = "block";
+
+                resultsDiv.innerHTML = `
+                    <p><strong>Matched Skills:</strong> ${result.matched_skills.length > 0 ? result.matched_skills.join(", ") : "None"}</p>
+                    <p><strong>Missing Skills:</strong> ${result.missing_skills.length > 0 ? result.missing_skills.join(", ") : "None"}</p>
+                    <p><strong>Job Fit Score:</strong> ${result.job_fit_score}%</p>
+                    <p><strong>Suggestions:</strong></p>
+                    <ul>
+                        ${result.suggestions.map(suggestion => `<li>${suggestion}</li>`).join("")}
+                    </ul>
+                `;
+            } catch (error) {
+                loadingMessage.style.display = "none";
+                alert("Error analyzing resume. Please try again.");
+            }
+        });
+    </script>
+</body>
+</html>
