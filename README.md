@@ -19,7 +19,7 @@ The **Resume Analyzer** is a web-based application that helps job seekers evalua
 
 ### 1️⃣ Clone the Repository  
 ```bash
-git clone https://github.com/your-username/resume-analyzer.git
+git clone https://github.com/Mahalaxmi2710/resume-analyzer.git
 cd resume-analyzer
 ```
 
